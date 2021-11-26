@@ -56,7 +56,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/@ecomshft/ebay-api.git"
+    "url": "git+ssh://git@github.com:Ecomshft/ebay-api.git"
   },
   "keywords": [
     "api",
@@ -113,9 +113,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/@ecomshft/ebay-api/issues"
+    "url": "https://github.com/Ecomshft/ebay-api/issues"
   },
-  "homepage": "https://github.com/@ecomshft/ebay-api#readme",
+  "homepage": "https://github.com/Ecomshft/ebay-api#readme",
   "directories": {
     "test": "test"
   },
