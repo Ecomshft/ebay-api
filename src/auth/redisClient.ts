@@ -32,12 +32,12 @@ const hash = (text: any) =>
 
 // https://github.com/brix/crypto-js#plain-text-encryption
 const encryptAccessToken = (accessToken: any) =>
-  cryptojs.AES.encrypt(accessToken, process.env.ACCESS_TOKEN_SECRET).toString();
+  cryptojs.AES.encrypt(accessToken, process.env.EBAY_ACCESS_TOKEN_SECRET).toString();
 
 const decryptAccessToken = (encryptedToken: any) =>
   cryptojs.AES.decrypt(
     encryptedToken,
-    process.env.ACCESS_TOKEN_SECRET
+    process.env.EBAY_ACCESS_TOKEN_SECRET
   ).toString(cryptojs.enc.Utf8);
 
 export const setAccessToken = async (refreshToken: any, accessToken: any) => {
