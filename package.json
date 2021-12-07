@@ -1,7 +1,7 @@
 {
   "name": "@ecomshft/ebay-api",
   "author": "Daniil Tomilow (original author)",
-  "version": "5.1.4",
+  "version": "5.1.5",
   "description": "Modified version of eBay TypeScript/JavaScript API for Node and Browser",
   "browser": "./lib/ebay-api.min.js",
   "main": "./lib/index.js",
