@@ -10,8 +10,9 @@ const HOUR_IN_SECONDS = 3600;
 
 // https://cloud.google.com/community/tutorials/nodejs-redis-on-appengine
 const client = (() => {
+  bluebird.promisifyAll(redis);
+  let redisClient = redis.createClient();
   if (process.env.REDIS_PORT) {
-    bluebird.promisifyAll(redis);
     const authParams: {
       [index: string]: any;
     } = {};
@@ -19,25 +20,29 @@ const client = (() => {
       authParams.auth_pass = process.env.REDIS_KEY;
       authParams.return_buffers = true;
     }
-    return redis.createClient(
+    redisClient = redis.createClient(
       process.env.REDIS_PORT,
       process.env.REDIS_HOST,
       authParams
     );
   }
+  return redisClient;
 })();
 
 const hash = (text: any) =>
   crypto.createHash("sha256").update(text).digest("hex");
-
+const defaultKeyWord = "12345";
 // https://github.com/brix/crypto-js#plain-text-encryption
 const encryptAccessToken = (accessToken: any) =>
-  cryptojs.AES.encrypt(accessToken, process.env.EBAY_ACCESS_TOKEN_SECRET).toString();
+  cryptojs.AES.encrypt(
+    accessToken,
+    process.env.EBAY_ACCESS_TOKEN_SECRET ?? defaultKeyWord
+  ).toString();
 
 const decryptAccessToken = (encryptedToken: any) =>
   cryptojs.AES.decrypt(
     encryptedToken,
-    process.env.EBAY_ACCESS_TOKEN_SECRET
+    process.env.EBAY_ACCESS_TOKEN_SECRET ?? defaultKeyWord
   ).toString(cryptojs.enc.Utf8);
 
 export const setAccessToken = async (refreshToken: any, accessToken: any) => {
@@ -51,7 +56,7 @@ export const setAccessToken = async (refreshToken: any, accessToken: any) => {
     hashedRefreshToken,
     encryptedAccessToken,
     "EX",
-    HOUR_IN_SECONDS
+    2 * (HOUR_IN_SECONDS - 120 ) //set expiry to be after 1 hour 58 minutes
   );
 };
 
