@@ -11,7 +11,6 @@ const HOUR_IN_SECONDS = 3600;
 // https://cloud.google.com/community/tutorials/nodejs-redis-on-appengine
 const client = (() => {
   bluebird.promisifyAll(redis);
-  let redisClient = redis.createClient();
   if (process.env.REDIS_PORT) {
     const authParams: {
       [index: string]: any;
@@ -20,13 +19,14 @@ const client = (() => {
       authParams.auth_pass = process.env.REDIS_KEY;
       authParams.return_buffers = true;
     }
-    redisClient = redis.createClient(
+    return redis.createClient(
       process.env.REDIS_PORT,
       process.env.REDIS_HOST,
       authParams
     );
+  } else {
+    return redis.createClient();
   }
-  return redisClient;
 })();
 
 const hash = (text: any) =>
@@ -56,7 +56,7 @@ export const setAccessToken = async (refreshToken: any, accessToken: any) => {
     hashedRefreshToken,
     encryptedAccessToken,
     "EX",
-    2 * (HOUR_IN_SECONDS - 120 ) //set expiry to be after 1 hour 58 minutes
+    2 * (HOUR_IN_SECONDS - 120) //set expiry to be after 1 hour 58 minutes
   );
 };
 
