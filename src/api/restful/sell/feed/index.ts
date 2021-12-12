@@ -52,8 +52,8 @@ export default class Feed extends Restful {
     return this.post(`/inventory_task`, data, {
       headers: {
         "X-EBAY-C-MARKETPLACE-ID": marketPlaceId,
-        "resolveWithFullResponse": true
       },
+      "resolveWithFullResponse": true
     });
   }
   /**
