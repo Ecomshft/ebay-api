@@ -1,16 +1,15 @@
-import Restful from '../../';
-import {multipartHeader} from '../../../../request';
-import {SellFeedParams} from '../../../../types';
+import Restful from "../../";
+import { multipartHeader } from "../../../../request";
+import { SellFeedParams } from "../../../../types";
 
 /**
  * The <strong>Feed API</strong> lets sellers upload input files, download reports and files including their status, filter reports using URI parameters, and retrieve customer service metrics task details.
  */
 export default class Feed extends Restful {
-
-  static id = 'Feed';
+  static id = "Feed";
 
   get basePath(): string {
-    return '/sell/feed/v1';
+    return "/sell/feed/v1";
   }
 
   /**
@@ -24,13 +23,13 @@ export default class Feed extends Restful {
    * @param scheduleId The schedule ID associated with the order task.
    */
   public getOrderTasks({
-                         dateRange,
-                         feedType,
-                         limit,
-                         lookBackDays,
-                         offset,
-                         scheduleId
-                       }: SellFeedParams = {}) {
+    dateRange,
+    feedType,
+    limit,
+    lookBackDays,
+    offset,
+    scheduleId,
+  }: SellFeedParams = {}) {
     return this.get(`/order_task`, {
       params: {
         date_range: dateRange,
@@ -38,8 +37,58 @@ export default class Feed extends Restful {
         limit,
         look_back_days: lookBackDays,
         offset,
-        schedule_id: scheduleId
-      }
+        schedule_id: scheduleId,
+      },
+    });
+  }
+
+  /**
+   * This method creates an inventory  task with filter criteria for the order report.
+   *
+   * @param data The CreateInvetoryTaskrequest
+   * @param marketPlaceId The market place ID of the inventory task.
+   */
+  public createInventoryTask(data: any, marketPlaceId?: string) {
+    return this.post(`/inventory_task`, data, {
+      headers: {
+        "X-EBAY-C-MARKETPLACE-ID": marketPlaceId,
+      },
+    });
+  }
+  /**
+   * This method gets an inventory.
+   *
+   * @param taskId The CreateInvetoryTaskrequest
+   */
+  public getInventoryTask(taskId: string) {
+    taskId = encodeURIComponent(taskId);
+    return this.get(`/inventory_task/${taskId}`);
+  }
+
+  /**
+   * This method searches for multiple tasks of a specific feed type, and includes date filters and pagination.
+   *
+   * @param data An object containing the following parameters:
+   */
+  // feed_type=string&
+  // schedule_id=string&
+  // look_back_days=integer&
+  // date_range=string&
+  // limit=integer&
+  // offset=integer
+
+  public getInventoryTasks(data: {
+    feed_type: string;
+    schedule_id: string;
+    look_back_days: number;
+    date_range: string;
+    limit: number;
+    offset: number;
+  }) {
+    return this.get(`/inventory_task`, {
+      params: {
+        ...data,
+      },
     });
   }
 
@@ -57,7 +106,7 @@ export default class Feed extends Restful {
    *
    * @param taskId The ID of the task. This ID is generated when the task was created by the createOrderTask method.
    */
-  public getOrderTask(taskId: string,) {
+  public getOrderTask(taskId: string) {
     taskId = encodeURIComponent(taskId);
 
     return this.get(`/order_task/${taskId}`);
@@ -70,17 +119,13 @@ export default class Feed extends Restful {
    * @param limit The maximum number of schedules that can be returned on each page of the paginated response.
    * @param offset The number of schedules to skip in the result set before returning the first schedule in the paginated response.
    */
-  public getSchedules({
-                        feedType,
-                        limit,
-                        offset,
-                      }: SellFeedParams = {}) {
+  public getSchedules({ feedType, limit, offset }: SellFeedParams = {}) {
     return this.get(`/schedule`, {
       params: {
         feed_type: feedType,
         limit,
-        offset
-      }
+        offset,
+      },
     });
   }
 
@@ -152,16 +197,16 @@ export default class Feed extends Restful {
    * @param offset The number of schedules to skip in the result set before returning the first schedule in the paginated response.
    */
   public getScheduleTemplates({
-                                feedType,
-                                limit,
-                                offset,
-                              }: SellFeedParams = {}) {
+    feedType,
+    limit,
+    offset,
+  }: SellFeedParams = {}) {
     return this.get(`/schedule_template`, {
       params: {
         feed_type: feedType,
         limit,
-        offset
-      }
+        offset,
+      },
     });
   }
 
@@ -176,13 +221,13 @@ export default class Feed extends Restful {
    * @param scheduleId The schedule ID associated with the task.
    */
   public getTasks({
-                    dateRange,
-                    feedType,
-                    limit,
-                    lookBackDays,
-                    offset,
-                    scheduleId
-                  }: SellFeedParams = {}) {
+    dateRange,
+    feedType,
+    limit,
+    lookBackDays,
+    offset,
+    scheduleId,
+  }: SellFeedParams = {}) {
     return this.get(`/task`, {
       params: {
         date_range: dateRange,
@@ -190,8 +235,8 @@ export default class Feed extends Restful {
         limit,
         look_back_days: lookBackDays,
         offset,
-        schedule_id: scheduleId
-      }
+        schedule_id: scheduleId,
+      },
     });
   }
 
@@ -258,12 +303,12 @@ export default class Feed extends Restful {
    * @param scheduleId The schedule ID associated with the task.
    */
   public getCustomerServiceMetricTasks({
-                                         dateRange,
-                                         feedType,
-                                         limit,
-                                         lookBackDays,
-                                         offset,
-                                       }: SellFeedParams = {}) {
+    dateRange,
+    feedType,
+    limit,
+    lookBackDays,
+    offset,
+  }: SellFeedParams = {}) {
     return this.get(`/customer_service_metric_task`, {
       params: {
         date_range: dateRange,
@@ -271,7 +316,7 @@ export default class Feed extends Restful {
         limit,
         look_back_days: lookBackDays,
         offset,
-      }
+      },
     });
   }
 
@@ -284,8 +329,8 @@ export default class Feed extends Restful {
   public createCustomerServiceMetricTask(acceptLanguage: string, data: any) {
     return this.post(`/customer_service_metric_task`, data, {
       headers: {
-        'accept-language': acceptLanguage
-      }
+        "accept-language": acceptLanguage,
+      },
     });
   }
 
