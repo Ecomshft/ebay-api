@@ -61,7 +61,6 @@ export class AxiosRequest implements IEBayApiRequest {
     return this.instance
       .post(url, payload, config)
       .then(({ data, headers }: any) => {
-        console.log("REQUEST HEADERS", requestHeaders)
         if (requestHeaders) {
           return { data, headers };
         }
