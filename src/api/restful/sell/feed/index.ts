@@ -53,7 +53,7 @@ export default class Feed extends Restful {
       headers: {
         "X-EBAY-C-MARKETPLACE-ID": marketPlaceId,
       },
-    });
+    }, undefined, true);
   }
   /**
    * This method gets an inventory.
