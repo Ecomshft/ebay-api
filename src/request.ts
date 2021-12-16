@@ -18,7 +18,11 @@ export const multipartHeader = {
 export interface IEBayApiRequest<T = AxiosInstance> {
   readonly instance: T;
 
-  get<R = any, C = any>(url: string, config?: C): Promise<R>;
+  get<R = any, C = any>(
+    url: string,
+    config?: C,
+    requestHeaders?: boolean
+  ): Promise<R>;
 
   delete<R = any, C = any>(url: string, config?: C): Promise<R>;
 
@@ -31,7 +35,12 @@ export interface IEBayApiRequest<T = AxiosInstance> {
 
   postForm<R = any, C = any>(url: string, data?: any, config?: C): Promise<R>;
 
-  put<R = any, C = any>(url: string, data?: any, config?: C): Promise<R>;
+  put<R = any, C = any>(
+    url: string,
+    data?: any,
+    config?: C,
+    requestHeaders?: boolean
+  ): Promise<R>;
 }
 
 export class AxiosRequest implements IEBayApiRequest {
@@ -46,16 +55,25 @@ export class AxiosRequest implements IEBayApiRequest {
     });
   }
 
-  public get<R = any>(url: string, config?: AxiosRequestConfig): Promise<R> {
+  public get<R = any>(
+    url: string,
+    config?: AxiosRequestConfig,
+    requestHeaders?: boolean
+  ): Promise<R> {
     log("get: " + url, config);
-    return this.instance.get(url, config).then(({ data }: any) => data);
+    return this.instance.get(url, config).then(({ data, headers }: any) => {
+      if (requestHeaders) {
+        return { data, headers };
+      }
+      return data;
+    });
   }
 
   public post<R = any>(
     url: string,
     payload?: any,
     config?: AxiosRequestConfig,
-    requestHeaders?: boolean 
+    requestHeaders?: boolean
   ): Promise<R> {
     log("post: " + url, { payload, config });
     return this.instance
@@ -76,12 +94,18 @@ export class AxiosRequest implements IEBayApiRequest {
   public put<R = any>(
     url: string,
     payload?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
+    requestHeaders?: boolean
   ): Promise<R> {
     log("put: " + url, { payload, config });
     return this.instance
       .put(url, payload, config)
-      .then(({ data }: any) => data);
+      .then(({ data, headers }: any) => {
+        if (requestHeaders) {
+          return { data, headers };
+        }
+        return data;
+      });
   }
 
   public postForm<R = any>(
