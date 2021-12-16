@@ -267,7 +267,7 @@ export default class Feed extends Restful {
   public getResultFile(taskId: string) {
     taskId = encodeURIComponent(taskId);
     return this.get(`/task/${taskId}/download_result_file`, {
-      reponseType: "arraybuffer"
+      responseType: "arraybuffer"
     });
   }
 
