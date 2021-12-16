@@ -153,8 +153,16 @@ export default abstract class Restful extends Api {
     return this.api({ subdomain: "apiz" });
   }
 
-  public async get(url: string, config: any = {}, apiConfig?: ApiConfig) {
-    return this.doRequest({ method: "get", url, config }, apiConfig);
+  public async get(
+    url: string,
+    config: any = {},
+    apiConfig?: ApiConfig,
+    requestHeaders?: boolean
+  ) {
+    return this.doRequest(
+      { method: "get", url, config: { ...config, requestHeaders } },
+      apiConfig
+    );
   }
 
   public async delete(url: string, config: any = {}, apiConfig?: ApiConfig) {
@@ -178,9 +186,13 @@ export default abstract class Restful extends Api {
     url: string,
     data?: any,
     config: any = {},
-    apiConfig?: ApiConfig
+    apiConfig?: ApiConfig,
+    requestHeaders?: boolean
   ) {
-    return this.doRequest({ method: "put", url, data, config }, apiConfig);
+    return this.doRequest(
+      { method: "put", url, data, config: { ...config, requestHeaders } },
+      apiConfig
+    );
   }
 
   get additionalHeaders() {
@@ -266,7 +278,7 @@ export default abstract class Restful extends Api {
       let args = ["get", "delete"].includes(method)
         ? [enrichedConfig]
         : [data, enrichedConfig];
-      if (method === "post" && requestHeaders) {
+      if (["post", "get", "put"].includes(method) && requestHeaders) {
         args.push(true);
       }
       // @ts-ignore
