@@ -49,11 +49,17 @@ export default class Feed extends Restful {
    * @param marketPlaceId The market place ID of the inventory task.
    */
   public createInventoryTask(data: any, marketPlaceId?: string) {
-    return this.post(`/inventory_task`, data, {
-      headers: {
-        "X-EBAY-C-MARKETPLACE-ID": marketPlaceId,
+    return this.post(
+      `/inventory_task`,
+      data,
+      {
+        headers: {
+          "X-EBAY-C-MARKETPLACE-ID": marketPlaceId ?? "EBAY_US",
+        },
       },
-    }, undefined, true);
+      undefined,
+      true
+    );
   }
   /**
    * This method gets an inventory.
@@ -97,8 +103,18 @@ export default class Feed extends Restful {
    *
    * @param data The CreateOrderTaskRequest
    */
-  public createOrderTask(data: any) {
-    return this.post(`/order_task`, data);
+  public createOrderTask(data: any, marketplaceId?: string) {
+    return this.post(
+      `/order_task`,
+      data,
+      {
+        headers: {
+          "X-EBAY-C-MARKETPLACE-ID": marketplaceId ?? "EBAY_US",
+        },
+      },
+      undefined,
+      true
+    );
   }
 
   /**
@@ -267,7 +283,7 @@ export default class Feed extends Restful {
   public getResultFile(taskId: string) {
     taskId = encodeURIComponent(taskId);
     return this.get(`/task/${taskId}/download_result_file`, {
-      responseType: "arraybuffer"
+      responseType: "arraybuffer",
     });
   }
 
