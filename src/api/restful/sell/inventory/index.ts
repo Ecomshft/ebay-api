@@ -269,7 +269,7 @@ export default class Inventory extends Restful {
         "bleh":"bleh"
       },
       headers: {
-        "Accept-Language": acceptLanguage ?? "en-US",
+        "accept-language": acceptLanguage?? "en-US",
         "Accept-Things": acceptLanguage ?? "en-US",
       },
     });
