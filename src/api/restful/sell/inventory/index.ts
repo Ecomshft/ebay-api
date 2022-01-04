@@ -266,6 +266,7 @@ export default class Inventory extends Restful {
         format,
         limit,
         offset,
+        "bleh":"bleh"
       },
       headers: {
         "Accept-Language": acceptLanguage ?? "en-US",
