@@ -551,7 +551,7 @@ export enum Condition {
 }
 
 export enum Locale {
-  en_US = 'en_US',
+  en_US = 'en-US',
   en_CA = 'en_CA',
   fr_CA = 'fr_CA',
   en_GB = 'en_GB',
