@@ -1,51 +1,57 @@
-import Api from '../';
-import Auth from '../../auth';
-import {EBayInvalidAccessToken, handleEBayError} from '../../errors';
-import {IEBayApiRequest} from '../../request';
-import {AppConfig} from '../../types';
+import Api from "../";
+import Auth from "../../auth";
+import { EBayInvalidAccessToken, handleEBayError } from "../../errors";
+import { IEBayApiRequest } from "../../request";
+import { AppConfig } from "../../types";
 
 export const defaultApiHeaders: Record<string, string> = {
-  'Content-Type': 'application/json',
-  'Cache-Control': 'no-cache',
+  "Content-Type": "application/json",
+  "Cache-Control": "no-cache",
   // @ts-ignore
-  ...(typeof window === 'undefined' ? {
-    'Accept-Encoding': 'application/gzip'
-  } : {})
+  ...(typeof window === "undefined"
+    ? {
+        "Accept-Encoding": "application/gzip",
+      }
+    : {}),
 };
 
 const additionalHeaders: Record<string, string> = {
-  marketplaceId: 'X-EBAY-C-MARKETPLACE-ID',
-  endUserCtx: 'X-EBAY-C-ENDUSERCTX',
-  acceptLanguage: 'Accept-Language',
-  contentLanguage: 'Content-Language',
+  marketplaceId: "X-EBAY-C-MARKETPLACE-ID",
+  endUserCtx: "X-EBAY-C-ENDUSERCTX",
+  acceptLanguage: "Accept-Language",
+  contentLanguage: "Content-Language",
 };
 
 export type ApiConfig = {
-  subdomain?: string
-  useIaf?: boolean
-  apiVersion?: string
-  basePath?: string
-  schema?: string
-  sandbox?: boolean
-  tld?: string
-  headers?: Record<string, string>
-}
+  subdomain?: string;
+  useIaf?: boolean;
+  apiVersion?: string;
+  basePath?: string;
+  schema?: string;
+  sandbox?: boolean;
+  tld?: string;
+  headers?: Record<string, string>;
+};
 
 export type ApiRequest = {
-  method: keyof IEBayApiRequest,
-  url: string,
-  config?: any, // AxiosConfig
-  data?: any,
-}
+  method: keyof IEBayApiRequest;
+  url: string;
+  config?: any; // AxiosConfig
+  data?: any;
+};
 
 export interface IRestful {
-  new(config: AppConfig, req?: IEBayApiRequest, auth?: Auth, apiConfig?: ApiConfig): Restful;
+  new (
+    config: AppConfig,
+    req?: IEBayApiRequest,
+    auth?: Auth,
+    apiConfig?: ApiConfig
+  ): Restful;
 
   id: string;
 }
 
 export default abstract class Restful extends Api {
-
   public readonly apiConfig: Required<ApiConfig>;
 
   constructor(
@@ -58,12 +64,17 @@ export default abstract class Restful extends Api {
 
     this.apiConfig = {
       ...this.getApiConfig(),
-      ...apiConfig
+      ...apiConfig,
     };
   }
 
-  public static buildServerUrl(schema: string, subdomain: string, sandbox: boolean, tld: string) {
-    return `${schema}${subdomain}.${sandbox ? 'sandbox.' : ''}${tld}`;
+  public static buildServerUrl(
+    schema: string,
+    subdomain: string,
+    sandbox: boolean,
+    tld: string
+  ) {
+    return `${schema}${subdomain}.${sandbox ? "sandbox." : ""}${tld}`;
   }
 
   abstract get basePath(): string;
@@ -76,19 +87,30 @@ export default abstract class Restful extends Api {
   }
 
   get schema() {
-    return 'https://';
+    return "https://";
   }
 
   get subdomain() {
-    return 'api';
+    return "api";
   }
 
   get apiVersionPath() {
-    return '';
+    return "";
   }
 
-  public getServerUrl({schema, subdomain, apiVersion, basePath, sandbox, tld}: Required<ApiConfig>): string {
-    return Restful.buildServerUrl(schema, subdomain, sandbox, tld) + apiVersion + basePath;
+  public getServerUrl({
+    schema,
+    subdomain,
+    apiVersion,
+    basePath,
+    sandbox,
+    tld,
+  }: Required<ApiConfig>): string {
+    return (
+      Restful.buildServerUrl(schema, subdomain, sandbox, tld) +
+      apiVersion +
+      basePath
+    );
   }
 
   public getApiConfig(): Required<ApiConfig> {
@@ -99,8 +121,8 @@ export default abstract class Restful extends Api {
       basePath: this.basePath,
       schema: this.schema,
       sandbox: this.config.sandbox,
-      tld: 'ebay.com',
-      headers: {}
+      tld: "ebay.com",
+      headers: {},
     };
   }
 
@@ -121,59 +143,90 @@ export default abstract class Restful extends Api {
    * Use "apix" subdomain
    */
   get apix() {
-    return this.api({subdomain: 'apix'});
+    return this.api({ subdomain: "apix" });
   }
 
   /**
    * Use "apiz" subdomain
    */
   get apiz() {
-    return this.api({subdomain: 'apiz'});
+    return this.api({ subdomain: "apiz" });
   }
 
-  public async get(url: string, config: any = {}, apiConfig?: ApiConfig) {
-    return this.doRequest({method: 'get', url, config}, apiConfig);
+  public async get(
+    url: string,
+    config: any = {},
+    apiConfig?: ApiConfig,
+    requestHeaders?: boolean
+  ) {
+    return this.doRequest(
+      { method: "get", url, config: { ...config, requestHeaders } },
+      apiConfig
+    );
   }
 
   public async delete(url: string, config: any = {}, apiConfig?: ApiConfig) {
-    return this.doRequest({method: 'delete', url, config}, apiConfig);
+    return this.doRequest({ method: "delete", url, config }, apiConfig);
   }
 
-  public async post(url: string, data?: any, config: any = {}, apiConfig?: ApiConfig) {
-    return this.doRequest({method: 'post', url, data, config}, apiConfig);
+  public async post(
+    url: string,
+    data?: any,
+    config: any = {},
+    apiConfig?: ApiConfig,
+    requestHeaders?: boolean
+  ) {
+    return this.doRequest(
+      { method: "post", url, data, config: { ...config, requestHeaders } },
+      apiConfig
+    );
   }
 
-  public async put(url: string, data?: any, config: any = {}, apiConfig?: ApiConfig) {
-    return this.doRequest({method: 'put', url, data, config}, apiConfig);
+  public async put(
+    url: string,
+    data?: any,
+    config: any = {},
+    apiConfig?: ApiConfig,
+    requestHeaders?: boolean
+  ) {
+    return this.doRequest(
+      { method: "put", url, data, config: { ...config, requestHeaders } },
+      apiConfig
+    );
   }
 
   get additionalHeaders() {
-    return Object.keys(additionalHeaders)
-      // @ts-ignore
-      .filter(key => typeof this.config[key] !== 'undefined')
-      .reduce((headers: any, key) => {
+    return (
+      Object.keys(additionalHeaders)
         // @ts-ignore
-        headers[additionalHeaders[key]] = this.config[key];
-        return headers;
-      }, {});
+        .filter((key) => typeof this.config[key] !== "undefined")
+        .reduce((headers: any, key) => {
+          // @ts-ignore
+          headers[additionalHeaders[key]] = this.config[key];
+          return headers;
+        }, {})
+    );
   }
 
-  public async enrichRequestConfig(config: any = {}, apiConfig: Required<ApiConfig> = this.apiConfig) {
+  public async enrichRequestConfig(
+    config: any = {},
+    apiConfig: Required<ApiConfig> = this.apiConfig
+  ) {
     const authHeader = await this.auth.getHeaderAuthorization(apiConfig.useIaf);
 
     const headers = {
       ...defaultApiHeaders,
       ...this.additionalHeaders,
       ...authHeader,
-      ...apiConfig.headers
+      ...apiConfig.headers,
     };
 
     return {
       ...config,
       headers: {
         ...(config.headers || {}),
-        ...headers
-      }
+        ...headers,
+      },
     };
   }
 
@@ -199,17 +252,20 @@ export default abstract class Restful extends Api {
       return true;
     }
 
-    return error?.meta?.res?.status === 401 && this.apiConfig.basePath === '/post-order/v2';
+    return (
+      error?.meta?.res?.status === 401 &&
+      this.apiConfig.basePath === "/post-order/v2"
+    );
   }
 
   private async request(
     apiRequest: ApiRequest,
     apiConfig: ApiConfig = this.apiConfig,
-    refreshToken = false,
+    refreshToken = false
   ): Promise<any> {
-    const {url, method, data, config} = apiRequest;
-
-    const apiCfg: Required<ApiConfig> = {...this.apiConfig, ...apiConfig};
+    const { url, method, data, config } = apiRequest;
+    const { requestHeaders } = config;
+    const apiCfg: Required<ApiConfig> = { ...this.apiConfig, ...apiConfig };
     const endpoint = this.getServerUrl(apiCfg) + url;
 
     try {
@@ -219,7 +275,12 @@ export default abstract class Restful extends Api {
 
       const enrichedConfig = await this.enrichRequestConfig(config, apiCfg);
 
-      const args = ['get', 'delete'].includes(method) ? [enrichedConfig] : [data, enrichedConfig];
+      let args = ["get", "delete"].includes(method)
+        ? [enrichedConfig]
+        : [data, enrichedConfig];
+      if (["post", "get", "put"].includes(method) && requestHeaders) {
+        args.push(true);
+      }
       // @ts-ignore
       return await this.req[method](endpoint, ...args);
     } catch (ex) {

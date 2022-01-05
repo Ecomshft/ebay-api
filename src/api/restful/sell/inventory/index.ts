@@ -1,4 +1,4 @@
-import Restful from '../../';
+import Restful from "../../";
 import {
   BulkEbayOfferDetailsWithKeys,
   BulkInventoryItem,
@@ -15,18 +15,17 @@ import {
   PublishByInventoryItemGroupRequest,
   SellInventoryItem,
   WithdrawByInventoryItemGroupRequest,
-} from '../../../../types';
+} from "../../../../types";
 
 /**
  * The Inventory API is used to create and manage inventory, and then to publish and manage this inventory on an eBay
  * marketplace.
  */
 export default class Inventory extends Restful {
-
-  static id = 'Inventory';
+  static id = "Inventory";
 
   get basePath(): string {
-    return '/sell/inventory/v1';
+    return "/sell/inventory/v1";
   }
 
   /**
@@ -70,9 +69,9 @@ export default class Inventory extends Restful {
    * @param offset The value passed in this query parameter sets the page number to retrieve.
    */
   public getInventoryLocations({
-                                 limit,
-                                 offset,
-                               }: { limit?: number; offset?: number } = {}) {
+    limit,
+    offset,
+  }: { limit?: number; offset?: number } = {}) {
     return this.get(`/location`, {
       params: {
         limit,
@@ -162,9 +161,9 @@ export default class Inventory extends Restful {
    * @param offset The value passed in this query parameter sets the page number to retrieve.
    */
   public getInventoryItems({
-                             limit,
-                             offset,
-                           }: { limit?: number; offset?: number } = {}) {
+    limit,
+    offset,
+  }: { limit?: number; offset?: number } = {}) {
     return this.get(`/inventory_item`, {
       params: {
         limit,
@@ -246,12 +245,12 @@ export default class Inventory extends Restful {
    * @param offset The value passed in this query parameter sets the page number to retrieve.
    */
   public getOffers({
-                     sku,
-                     marketplaceId,
-                     format,
-                     limit,
-                     offset,
-                   }: {
+    sku,
+    marketplaceId,
+    format,
+    limit,
+    offset
+  }: {
     sku?: string;
     marketplaceId?: string;
     format?: string;

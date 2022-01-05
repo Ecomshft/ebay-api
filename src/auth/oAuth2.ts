@@ -1,20 +1,21 @@
-import debug from 'debug';
-import Base from '../api/base';
-import {Scope} from '../types';
+import debug from "debug";
+import Base from "../api/base";
+import { Scope } from "../types";
+import { getAccessToken, setAccessToken } from "./redisClient";
 
-const log = debug('ebay:oauth2');
+const log = debug("ebay:oauth2");
 
 export type Token = {
-  access_token: string,
-  expires_in: number, // default 2 hours
-  token_type: string
+  access_token: string;
+  expires_in: number; // default 2 hours
+  token_type: string;
 };
 
 export type ClientToken = Token;
 
 export type AuthToken = Token & {
-  refresh_token: string,
-  refresh_token_expires_in: number
+  refresh_token: string;
+  refresh_token_expires_in: number;
 };
 
 /**
@@ -26,32 +27,40 @@ export type AuthToken = Token & {
 export default class OAuth2 extends Base {
   // If all the calls in our application require just an Application access token we can use this endpoint
   public static readonly IDENTITY_ENDPOINT: Record<string, string> = {
-    production: 'https://api.ebay.com/identity/v1/oauth2/token',
-    sandbox: 'https://api.sandbox.ebay.com/identity/v1/oauth2/token'
+    production: "https://api.ebay.com/identity/v1/oauth2/token",
+    sandbox: "https://api.sandbox.ebay.com/identity/v1/oauth2/token",
   };
 
   public static readonly AUTHORIZE_ENDPOINT: Record<string, string> = {
-    production: 'https://auth.ebay.com/oauth2/authorize',
-    sandbox: 'https://auth.sandbox.ebay.com/oauth2/authorize'
+    production: "https://auth.ebay.com/oauth2/authorize",
+    sandbox: "https://auth.sandbox.ebay.com/oauth2/authorize",
   };
 
-  public static readonly defaultScopes: Scope = ['https://api.ebay.com/oauth/api_scope'];
+  public static readonly defaultScopes: Scope = [
+    "https://api.ebay.com/oauth/api_scope",
+  ];
 
   public static generateAuthUrl(
     sandbox: boolean,
     appId: string,
     ruName: string,
     scope: string[],
-    state = ''
+    state = ""
   ): string {
     return [
-      sandbox ? OAuth2.AUTHORIZE_ENDPOINT.sandbox : OAuth2.AUTHORIZE_ENDPOINT.production,
-      '?client_id=', encodeURIComponent(appId),
-      '&redirect_uri=', encodeURIComponent(ruName),
-      '&response_type=code',
-      '&state=', encodeURIComponent(state),
-      '&scope=', encodeURIComponent(scope.join(' '))
-    ].join('');
+      sandbox
+        ? OAuth2.AUTHORIZE_ENDPOINT.sandbox
+        : OAuth2.AUTHORIZE_ENDPOINT.production,
+      "?client_id=",
+      encodeURIComponent(appId),
+      "&redirect_uri=",
+      encodeURIComponent(ruName),
+      "&response_type=code",
+      "&state=",
+      encodeURIComponent(state),
+      "&scope=",
+      encodeURIComponent(scope.join(" ")),
+    ].join("");
   }
 
   private scope: Scope = this.config.scope || OAuth2.defaultScopes;
@@ -59,7 +68,9 @@ export default class OAuth2 extends Base {
   private _authToken?: AuthToken;
 
   get identityEndpoint() {
-    return this.config.sandbox ? OAuth2.IDENTITY_ENDPOINT.sandbox : OAuth2.IDENTITY_ENDPOINT.production
+    return this.config.sandbox
+      ? OAuth2.IDENTITY_ENDPOINT.sandbox
+      : OAuth2.IDENTITY_ENDPOINT.production;
   }
 
   /**
@@ -71,12 +82,12 @@ export default class OAuth2 extends Base {
   }
 
   public getUserAccessToken(): string | null {
-    return this._authToken?.access_token ?? null
+    return this._authToken?.access_token ?? null;
   }
 
   public async getApplicationAccessToken(): Promise<string> {
     if (this._clientToken) {
-      log('Return existing application access token: ', this._clientToken);
+      log("Return existing application access token: ", this._clientToken);
       return this._clientToken.access_token;
     }
 
@@ -105,25 +116,29 @@ export default class OAuth2 extends Base {
    */
   public async mintApplicationAccessToken(): Promise<ClientToken> {
     if (!this.config.appId) {
-      throw new Error('Missing App ID (Client Id)');
+      throw new Error("Missing App ID (Client Id)");
     }
 
     if (!this.config.certId) {
-      throw new Error('Missing Cert Id (Client Secret)');
+      throw new Error("Missing Cert Id (Client Secret)");
     }
 
     try {
-      return await this.req.postForm(this.identityEndpoint, {
-        scope: this.scope.join(' '),
-        grant_type: 'client_credentials'
-      }, {
-        auth: {
-          username: this.config.appId,
-          password: this.config.certId
+      return await this.req.postForm(
+        this.identityEndpoint,
+        {
+          scope: this.scope.join(" "),
+          grant_type: "client_credentials",
+        },
+        {
+          auth: {
+            username: this.config.appId,
+            password: this.config.certId,
+          },
         }
-      });
+      );
     } catch (error) {
-      log('Failed to mint application token', error);
+      log("Failed to mint application token", error);
       throw error;
     }
   }
@@ -132,19 +147,22 @@ export default class OAuth2 extends Base {
    * Client credentials grant flow.
    */
   public async obtainApplicationAccessToken(): Promise<ClientToken> {
-    log('Obtain a new application access token with scope: ', this.scope.join(','));
+    log(
+      "Obtain a new application access token with scope: ",
+      this.scope.join(",")
+    );
 
     try {
       const token = await this.mintApplicationAccessToken();
 
-      log('Obtained a new application access token:', token);
+      log("Obtained a new application access token:", token);
 
       this.setClientToken(token);
-      this.emit('refreshClientToken', token);
+      this.emit("refreshClientToken", token);
 
       return token;
     } catch (error) {
-      log('Failed to obtain application token', error);
+      log("Failed to obtain application token", error);
       throw error;
     }
   }
@@ -156,14 +174,24 @@ export default class OAuth2 extends Base {
    * @param scope the scopes
    * @param state state parameter returned in the redirect URL
    */
-  public generateAuthUrl(ruName?: string, scope: string[] = this.scope, state = ''): string {
+  public generateAuthUrl(
+    ruName?: string,
+    scope: string[] = this.scope,
+    state = ""
+  ): string {
     ruName = ruName || this.config.ruName;
 
     if (!ruName) {
-      throw new Error('RuName is required.');
+      throw new Error("RuName is required.");
     }
 
-    return OAuth2.generateAuthUrl(this.config.sandbox, this.config.appId, ruName, scope, state);
+    return OAuth2.generateAuthUrl(
+      this.config.sandbox,
+      this.config.appId,
+      ruName,
+      scope,
+      state
+    );
   }
 
   /**
@@ -176,21 +204,25 @@ export default class OAuth2 extends Base {
    */
   public async mintUserAccessToken(code: string, ruName = this.config.ruName) {
     try {
-      const token = await this.req.postForm(this.identityEndpoint, {
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: ruName
-      }, {
-        auth: {
-          username: this.config.appId,
-          password: this.config.certId
+      const token = await this.req.postForm(
+        this.identityEndpoint,
+        {
+          grant_type: "authorization_code",
+          code,
+          redirect_uri: ruName,
+        },
+        {
+          auth: {
+            username: this.config.appId,
+            password: this.config.certId,
+          },
         }
-      });
+      );
 
-      log('User Access Token', token);
+      log("User Access Token", token);
       return token;
     } catch (error) {
-      log('Failed to get the token', error);
+      log("Failed to get the token", error);
       throw error;
     }
   }
@@ -207,40 +239,74 @@ export default class OAuth2 extends Base {
     return await this.mintUserAccessToken(code, ruName);
   }
 
+  public async initialize(refreshToken: string) {
+    this.setCredentials({
+      expires_in: 7200,
+      refresh_token_expires_in: 47304000,
+      token_type: "User Access Token",
+      refresh_token: refreshToken,
+      access_token:"",
+    })
+    await this.refreshToken();
+  }
   /**
    * Authorization code grant flow.
    */
   public async refreshUserAccessToken(): Promise<AuthToken> {
     if (!this._authToken || !this._authToken.refresh_token) {
-      log('Tried to refresh user access token before it was set.');
-      throw new Error('Failed to refresh the user access token. Token or refresh_token is not set.');
+      log("Tried to refresh user access token before it was set.");
+      throw new Error(
+        "Failed to refresh the user access token. Token or refresh_token is not set."
+      );
     }
 
-    try {
-      const token = await this.req.postForm(this.identityEndpoint, {
-        grant_type: 'refresh_token',
-        refresh_token: this._authToken.refresh_token,
-        scope: this.scope.join(' ')
-      }, {
-        auth: {
-          username: this.config.appId,
-          password: this.config.certId
-        }
-      });
+      let storedAccessToken = await getAccessToken(
+        this._authToken.refresh_token
+      );
+      if (
+        storedAccessToken &&
+        storedAccessToken !== this._authToken.access_token
+      ) {
+        const credentials = {
+          ...this._authToken,
+          access_token: storedAccessToken,
+        };
+        this.setCredentials(credentials); //set this as the new access token
+        return credentials;
+      }
 
-      log('Successfully refreshed token', token);
+    try {
+      const token = await this.req.postForm(
+        this.identityEndpoint,
+        {
+          grant_type: "refresh_token",
+          refresh_token: this._authToken.refresh_token,
+          scope: this.scope.join(" "),
+        },
+        {
+          auth: {
+            username: this.config.appId,
+            password: this.config.certId,
+          },
+        }
+      );
+
+      log("Successfully refreshed token", token);
 
       const refreshedToken = {
         ...this._authToken,
-        ...token
+        ...token,
       };
-
       this.setCredentials(refreshedToken);
-      this.emit('refreshAuthToken', refreshedToken);
+      await setAccessToken(
+        this._authToken.refresh_token,
+        refreshedToken.access_token
+      ); //store the refreshed token in redis
+      this.emit("refreshAuthToken", refreshedToken);
 
       return refreshedToken;
     } catch (error) {
-      log('Failed to refresh the token', error);
+      log("Failed to refresh the token", error);
       throw error;
     }
   }
@@ -254,34 +320,34 @@ export default class OAuth2 extends Base {
    */
   public async obtainToken(code: string): Promise<AuthToken> {
     const token = await this.getToken(code);
-    log('Obtain user access token', token);
-    this.setCredentials(token)
+    log("Obtain user access token", token);
+    this.setCredentials(token);
 
-    return token
+    return token;
   }
 
   public getCredentials(): AuthToken | ClientToken | null {
     if (this._authToken) {
       return {
-        ...this._authToken
+        ...this._authToken,
       };
     } else if (this._clientToken) {
       return {
-        ...this._clientToken
-      }
+        ...this._clientToken,
+      };
     }
 
     return null;
   }
 
   public setCredentials(authToken: AuthToken | string) {
-    if (typeof authToken === 'string') {
+    if (typeof authToken === "string") {
       this._authToken = {
-        refresh_token: '',
+        refresh_token: "",
         expires_in: 7200,
         refresh_token_expires_in: 47304000,
-        token_type: 'User Access Token',
-        access_token: authToken
+        token_type: "User Access Token",
+        access_token: authToken,
       };
     } else {
       this._authToken = authToken;
@@ -298,6 +364,8 @@ export default class OAuth2 extends Base {
       return await this.obtainApplicationAccessToken();
     }
 
-    throw new Error('Missing credentials. To refresh a token an application access token or user access token must be already set.');
+    throw new Error(
+      "Missing credentials. To refresh a token an application access token or user access token must be already set."
+    );
   }
 }
