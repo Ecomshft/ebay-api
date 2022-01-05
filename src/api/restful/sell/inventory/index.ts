@@ -249,15 +249,13 @@ export default class Inventory extends Restful {
     marketplaceId,
     format,
     limit,
-    offset,
-    acceptLanguage,
+    offset
   }: {
     sku?: string;
     marketplaceId?: string;
     format?: string;
     limit?: number;
     offset?: number;
-    acceptLanguage?: string;
   } = {}) {
     return this.get(`/offer`, {
       params: {
